@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://dv7pwoq3p8pjv"]
+
+[ext_resource type="PackedScene" uid="uid://bna4cpjjypvx6" path="res://prefabs/player.tscn" id="1_1n8wp"]
+[ext_resource type="Script" path="res://scripts/SpawnerScript.cs" id="2_0vtgq"]
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_texns"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_3fbq4"]
+size = Vector2(20, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_qfcfv"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_nu7w2"]
+
+[node name="MainScene" type="Node3D"]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("WorldBoundaryShape3D_texns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("PlaneMesh_3fbq4")
+
+[node name="Player" parent="." instance=ExtResource("1_1n8wp")]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.923351, 0.383957, 0, -0.383957, 0.923351, 0, 4.53794, 3.97025)
+shadow_enabled = true
+
+[node name="Spawner" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.12033, -7.63056)
+script = ExtResource("2_0vtgq")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+shape = SubResource("BoxShape3D_qfcfv")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Spawner"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+mesh = SubResource("BoxMesh_nu7w2")
