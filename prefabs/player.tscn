@@ -1,14 +1,34 @@
-[gd_scene load_steps=5 format=3 uid="uid://bna4cpjjypvx6"]
+[gd_scene load_steps=9 format=3 uid="uid://bna4cpjjypvx6"]
 
 [ext_resource type="Script" path="res://scripts/PlayerScript.cs" id="1_3fyik"]
 [ext_resource type="PackedScene" uid="uid://d2mcyp6ph5pqf" path="res://prefabs/player_ui.tscn" id="2_mls8o"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1i0e3"]
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_qdv0a"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_61fss"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_nkllq"]
+height = 0.137
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jieos"]
+albedo_color = Color(0.516627, 0.766793, 1, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_jc2xx"]
+material = SubResource("StandardMaterial3D_jieos")
+radius = 0.25
+height = 0.7
 
 [node name="Player" type="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+collision_layer = 2
 script = ExtResource("1_3fyik")
 
 [node name="Camera3D" type="Camera3D" parent="."]
@@ -19,5 +39,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.521317, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_1i0e3")
 
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_qdv0a")
+
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_61fss")
+skeleton = NodePath("../MeshInstance3D2")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.802537, 0)
+mesh = SubResource("CylinderMesh_nkllq")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0.502647, -0.264464)
+mesh = SubResource("CapsuleMesh_jc2xx")
+skeleton = NodePath("../MeshInstance3D2")

@@ -8,29 +8,65 @@ public partial class SpawnerScript : Node3D
   [Export]
   public float SpawnInterval = 10.0f;
 
-  private Timer _timer;
+  Timer? Timer;
+
+  public override void _EnterTree()
+  {
+    if (!Multiplayer.IsServer())
+    {
+      return;
+    }
+
+    Timer?.Stop();
+  }
+
+  public override void _ExitTree()
+  {
+    if (!Multiplayer.IsServer())
+    {
+      return;
+    }
+
+    Timer?.Stop();
+  }
 
   public override void _Ready()
   {
+    if (!Multiplayer.IsServer())
+    {
+      return;
+    }
+
     ObjectToSpawn = ResourceLoader.Load<PackedScene>("res://prefabs/unit.tscn");
 
-    _timer = new Timer();
+    Timer = new Timer();
 
-    AddChild(_timer);
+    AddChild(Timer);
 
-    _timer.WaitTime = SpawnInterval;
-    _timer.OneShot = false;
+    Timer.WaitTime = SpawnInterval;
+    Timer.OneShot = false;
 
-    _timer.Timeout += () =>
+    Timer.Timeout += () =>
     {
-      if (ObjectToSpawn != null)
-      {
-        var instance = ObjectToSpawn.Instantiate<Node3D>();
-        AddChild(instance);
-        instance.GlobalTransform = new Transform3D(Basis.Identity, GlobalTransform.Origin + GlobalTransform.Basis.Z * -1);
-      }
+      Spawn();
     };
 
-    _timer.Start();
+    Timer.Start();
+
+    Spawn();
+  }
+
+  void Spawn()
+  {
+    if (ObjectToSpawn != null)
+    {
+      GD.Print($"{Multiplayer.GetUniqueId()} spawning");
+
+      var instance = ObjectToSpawn.Instantiate<Node3D>();
+      instance.GlobalTransform = new Transform3D(Basis.Identity, GlobalTransform.Origin + GlobalTransform.Basis.Z * -5);
+      instance.Name = "Unit";
+
+      GetTree().Root.GetChild(0).CallDeferred(Node.MethodName.AddChild, instance, true);
+    }
   }
 }

@@ -1,13 +1,80 @@
-[gd_scene load_steps=3 format=3 uid="uid://cftvkr1sbbhxs"]
+[gd_scene load_steps=11 format=3 uid="uid://cftvkr1sbbhxs"]
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_olkfq"]
+[ext_resource type="Script" path="res://scripts/UnitScript.cs" id="1_qta0i"]
+[ext_resource type="PackedScene" uid="uid://bsj7s8vxfywr7" path="res://prefabs/weapon.tscn" id="2_hdq5y"]
 
-[sub_resource type="SphereMesh" id="SphereMesh_h0pyf"]
+[sub_resource type="Animation" id="Animation_b3n7q"]
+length = 0.001
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("WeaponContainer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1)
 
-[node name="RigidBody3D" type="RigidBody3D"]
+[sub_resource type="Animation" id="Animation_4px3i"]
+resource_name = "weapon_animation"
+length = 2.0
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("WeaponContainer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, -0.707107, 0, 0, 0.707107, 2, 1, 0, 0, 0, 1)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_02v2s"]
+_data = {
+"RESET": SubResource("Animation_b3n7q"),
+"weapon_animation": SubResource("Animation_4px3i")
+}
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4uvih"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_1xlp0"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bpwl5"]
+albedo_color = Color(0.974852, 0.410673, 0.379264, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_bu56x"]
+material = SubResource("StandardMaterial3D_bpwl5")
+radius = 0.125
+height = 0.5
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_d6xj0"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[node name="Unit" type="CharacterBody3D"]
+script = ExtResource("1_qta0i")
+metadata/unit = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_02v2s")
+}
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("SphereShape3D_olkfq")
+shape = SubResource("CapsuleShape3D_4uvih")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-mesh = SubResource("SphereMesh_h0pyf")
+mesh = SubResource("CapsuleMesh_1xlp0")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0.5, -0.467097)
+mesh = SubResource("CapsuleMesh_bu56x")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_d6xj0")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+
+[node name="WeaponContainer" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.552709, 0.316251, -1.0327)
+
+[node name="Weapon" parent="WeaponContainer" instance=ExtResource("2_hdq5y")]

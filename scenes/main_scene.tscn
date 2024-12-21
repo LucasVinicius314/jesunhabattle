@@ -1,41 +1,50 @@
 [gd_scene load_steps=7 format=3 uid="uid://dv7pwoq3p8pjv"]
 
-[ext_resource type="PackedScene" uid="uid://bna4cpjjypvx6" path="res://prefabs/player.tscn" id="1_1n8wp"]
-[ext_resource type="Script" path="res://scripts/SpawnerScript.cs" id="2_0vtgq"]
+[ext_resource type="Script" path="res://scripts/MainSceneScript.cs" id="1_4db5m"]
 
-[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_texns"]
+[sub_resource type="NavigationMesh" id="NavigationMesh_su8yw"]
+vertices = PackedVector3Array(-49.5, 1, -2.5, -10.5, 1, -2.5, -10.25, 1, -3.75, -9, 1, -49.5, -49.5, 1, -49.5, -8.75, 1, -3.75, 9, 1, -3.75, 9.25, 1, -49.5, 10.5, 1, -3.75, 10.75, 1, -2.5, 49.5, 1, -2.5, 49.5, 1, -49.5, -10.25, 1, -1.5, -49.5, 1, 49.5, -8.25, 1, 49.5, -8.25, 1, -1.5, 10.5, 1, -1.5, 8.5, 1, 49.5, 49.5, 1, 49.5, 8.5, 1, -1.5)
+polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 4), PackedInt32Array(2, 4, 3), PackedInt32Array(3, 5, 2), PackedInt32Array(5, 3, 6), PackedInt32Array(6, 3, 7), PackedInt32Array(9, 8, 10), PackedInt32Array(10, 8, 11), PackedInt32Array(11, 8, 7), PackedInt32Array(8, 6, 7), PackedInt32Array(1, 12, 0), PackedInt32Array(0, 12, 13), PackedInt32Array(13, 12, 14), PackedInt32Array(12, 15, 14), PackedInt32Array(9, 10, 16), PackedInt32Array(16, 10, 18), PackedInt32Array(16, 18, 17), PackedInt32Array(17, 19, 16), PackedInt32Array(15, 19, 14), PackedInt32Array(14, 19, 17)]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_3fbq4"]
-size = Vector2(20, 20)
+[sub_resource type="BoxShape3D" id="BoxShape3D_ougbl"]
+size = Vector3(100, 1, 100)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_qfcfv"]
+[sub_resource type="BoxMesh" id="BoxMesh_sy003"]
+size = Vector3(100, 1, 100)
 
-[sub_resource type="BoxMesh" id="BoxMesh_nu7w2"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_0pqux"]
+size = Vector3(20, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sx3p4"]
+size = Vector3(20, 1, 1)
 
 [node name="MainScene" type="Node3D"]
-
-[node name="Ground" type="StaticBody3D" parent="."]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
-shape = SubResource("WorldBoundaryShape3D_texns")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
-mesh = SubResource("PlaneMesh_3fbq4")
-
-[node name="Player" parent="." instance=ExtResource("1_1n8wp")]
+script = ExtResource("1_4db5m")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.923351, 0.383957, 0, -0.383957, 0.923351, 0, 4.53794, 3.97025)
 shadow_enabled = true
 
-[node name="Spawner" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.12033, -7.63056)
-script = ExtResource("2_0vtgq")
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_su8yw")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner"]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
-shape = SubResource("BoxShape3D_qfcfv")
+[node name="Ground" type="StaticBody3D" parent="NavigationRegion3D"]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Spawner"]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
-mesh = SubResource("BoxMesh_nu7w2")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Ground"]
+shape = SubResource("BoxShape3D_ougbl")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Ground"]
+mesh = SubResource("BoxMesh_sy003")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48319, -2.59072)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D"]
+shape = SubResource("BoxShape3D_0pqux")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/StaticBody3D"]
+mesh = SubResource("BoxMesh_sx3p4")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://prefabs/player.tscn", "res://prefabs/unit.tscn", "res://prefabs/spawner.tscn")
+spawn_path = NodePath("..")

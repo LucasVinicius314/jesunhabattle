@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3 uid="uid://llmiafdsfqp3"]
+
+[ext_resource type="Script" path="res://scripts/SpawnerScript.cs" id="1_ripq2"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_qfcfv"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_nu7w2"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ao7nu"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+
+[node name="Spawner" type="StaticBody3D"]
+script = ExtResource("1_ripq2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+shape = SubResource("BoxShape3D_qfcfv")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+mesh = SubResource("BoxMesh_nu7w2")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_ao7nu")
