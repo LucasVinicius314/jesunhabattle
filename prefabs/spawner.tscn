@@ -1,10 +1,15 @@
-[gd_scene load_steps=5 format=3 uid="uid://llmiafdsfqp3"]
+[gd_scene load_steps=7 format=3 uid="uid://llmiafdsfqp3"]
 
 [ext_resource type="Script" path="res://scripts/SpawnerScript.cs" id="1_ripq2"]
+[ext_resource type="PackedScene" uid="uid://cmyelxmccoi3c" path="res://prefabs/miner_unit.tscn" id="2_6jhe1"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qfcfv"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u1bqk"]
+albedo_color = Color(1, 0.482353, 0.321569, 1)
+
 [sub_resource type="BoxMesh" id="BoxMesh_nu7w2"]
+material = SubResource("StandardMaterial3D_u1bqk")
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ao7nu"]
 properties/0/path = NodePath(".:position")
@@ -13,6 +18,8 @@ properties/0/replication_mode = 1
 
 [node name="Spawner" type="StaticBody3D"]
 script = ExtResource("1_ripq2")
+ObjectToSpawn = ExtResource("2_6jhe1")
+metadata/Spawner = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)

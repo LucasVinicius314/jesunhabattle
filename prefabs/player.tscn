@@ -1,7 +1,18 @@
-[gd_scene load_steps=9 format=3 uid="uid://bna4cpjjypvx6"]
+[gd_scene load_steps=12 format=3 uid="uid://bna4cpjjypvx6"]
 
 [ext_resource type="Script" path="res://scripts/PlayerScript.cs" id="1_3fyik"]
+[ext_resource type="Texture2D" uid="uid://cx5g2crwr6koo" path="res://skyboxes/industrial_sunset_puresky_4k.exr" id="2_b2dwg"]
 [ext_resource type="PackedScene" uid="uid://d2mcyp6ph5pqf" path="res://prefabs/player_ui.tscn" id="2_mls8o"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_mggja"]
+panorama = ExtResource("2_b2dwg")
+
+[sub_resource type="Sky" id="Sky_tnusw"]
+sky_material = SubResource("PanoramaSkyMaterial_mggja")
+
+[sub_resource type="Environment" id="Environment_m4kcv"]
+background_mode = 2
+sky = SubResource("Sky_tnusw")
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1i0e3"]
 
@@ -14,9 +25,6 @@ properties/1/spawn = true
 properties/1/replication_mode = 1
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_61fss"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_nkllq"]
-height = 0.137
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jieos"]
 albedo_color = Color(0.516627, 0.766793, 1, 1)
@@ -33,6 +41,7 @@ script = ExtResource("1_3fyik")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.521317, 0)
+environment = SubResource("Environment_m4kcv")
 
 [node name="PlayerUi" parent="Camera3D" instance=ExtResource("2_mls8o")]
 
@@ -44,13 +53,9 @@ replication_config = SubResource("SceneReplicationConfig_qdv0a")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_61fss")
-skeleton = NodePath("../MeshInstance3D2")
-
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.802537, 0)
-mesh = SubResource("CylinderMesh_nkllq")
+skeleton = NodePath("")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0.502647, -0.264464)
 mesh = SubResource("CapsuleMesh_jc2xx")
-skeleton = NodePath("../MeshInstance3D2")
+skeleton = NodePath("")

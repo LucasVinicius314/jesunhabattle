@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 
 project/assembly_name="JesunhaBattle"
 
+[global_group]
+
+ores=""
+
 [input]
 
 game_forward={

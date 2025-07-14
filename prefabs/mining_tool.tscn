@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://cu8w6q2xg1jvq"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hko5w"]
+size = Vector3(0.095, 1.385, 0.115)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6y4ey"]
+size = Vector3(0.095, 0.16, 0.99)
+
+[sub_resource type="BoxMesh" id="BoxMesh_joj3h"]
+size = Vector3(0.065, 1.365, 0.065)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gk7wg"]
+size = Vector3(0.07, 0.14, 0.965)
+
+[node name="MiningTool" type="StaticBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_hko5w")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.668898, 0)
+shape = SubResource("BoxShape3D_6y4ey")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_joj3h")
+skeleton = NodePath("../..")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.667459, 0)
+mesh = SubResource("BoxMesh_gk7wg")
+skeleton = NodePath("../..")

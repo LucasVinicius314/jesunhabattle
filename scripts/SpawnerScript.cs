@@ -3,10 +3,10 @@ using Godot;
 public partial class SpawnerScript : Node3D
 {
   [Export]
-  public PackedScene ObjectToSpawn;
+  public PackedScene? ObjectToSpawn;
 
   [Export]
-  public float SpawnInterval = 10.0f;
+  float SpawnInterval = 10.0f;
 
   Timer? Timer;
 
@@ -36,8 +36,6 @@ public partial class SpawnerScript : Node3D
     {
       return;
     }
-
-    ObjectToSpawn = ResourceLoader.Load<PackedScene>("res://prefabs/unit.tscn");
 
     Timer = new Timer();
 

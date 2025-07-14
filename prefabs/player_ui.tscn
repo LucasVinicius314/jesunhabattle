@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://d2mcyp6ph5pqf"]
+[gd_scene load_steps=3 format=3 uid="uid://d2mcyp6ph5pqf"]
 
 [ext_resource type="Texture2D" uid="uid://cjhq04xuiog0g" path="res://sprites/crosshair.png" id="1_1r0qt"]
+[ext_resource type="Script" path="res://scripts/PlayerUiScript.cs" id="1_rjlwj"]
 
 [node name="PlayerUi" type="Control"]
 layout_mode = 3
@@ -9,6 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_rjlwj")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -25,11 +27,11 @@ theme_override_constants/margin_bottom = 32
 [node name="Control" type="Control" parent="MarginContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/Control"]
+[node name="MoneyLabel" type="Label" parent="MarginContainer/Control"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
-text = "asdasdasdas"
+text = "Money: <none>"
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/Control"]
 layout_mode = 1

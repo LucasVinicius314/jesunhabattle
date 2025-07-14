@@ -1,7 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://cftvkr1sbbhxs"]
+[gd_scene load_steps=11 format=3 uid="uid://cmyelxmccoi3c"]
 
-[ext_resource type="Script" path="res://scripts/UnitScript.cs" id="1_qta0i"]
-[ext_resource type="PackedScene" uid="uid://bsj7s8vxfywr7" path="res://prefabs/weapon.tscn" id="2_hdq5y"]
+[ext_resource type="Script" path="res://scripts/UnitScript.cs" id="1_xw6bb"]
+[ext_resource type="PackedScene" uid="uid://cu8w6q2xg1jvq" path="res://prefabs/mining_tool.tscn" id="2_gqt7q"]
 
 [sub_resource type="Animation" id="Animation_b3n7q"]
 length = 0.001
@@ -35,7 +35,7 @@ _data = {
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_1xlp0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bpwl5"]
-albedo_color = Color(0.974852, 0.410673, 0.379264, 1)
+albedo_color = Color(0.678311, 0.617327, 0.391937, 1)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_bu56x"]
 material = SubResource("StandardMaterial3D_bpwl5")
@@ -51,7 +51,9 @@ properties/1/spawn = true
 properties/1/replication_mode = 1
 
 [node name="Unit" type="CharacterBody3D"]
-script = ExtResource("1_qta0i")
+script = ExtResource("1_xw6bb")
+Speed = 6.0
+UnitType = 2
 metadata/unit = true
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
@@ -73,8 +75,9 @@ mesh = SubResource("CapsuleMesh_bu56x")
 replication_config = SubResource("SceneReplicationConfig_d6xj0")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+target_desired_distance = 4.0
 
 [node name="WeaponContainer" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.552709, 0.316251, -1.0327)
 
-[node name="Weapon" parent="WeaponContainer" instance=ExtResource("2_hdq5y")]
+[node name="MiningTool" parent="WeaponContainer" instance=ExtResource("2_gqt7q")]

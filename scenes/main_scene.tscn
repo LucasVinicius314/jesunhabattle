@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://dv7pwoq3p8pjv"]
+[gd_scene load_steps=8 format=3 uid="uid://dv7pwoq3p8pjv"]
 
 [ext_resource type="Script" path="res://scripts/MainSceneScript.cs" id="1_4db5m"]
+[ext_resource type="Material" uid="uid://ea0fnffjw7cu" path="res://materials/muddy_wet_sand.tres" id="2_in7eu"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_su8yw"]
 vertices = PackedVector3Array(-49.5, 1, -2.5, -10.5, 1, -2.5, -10.25, 1, -3.75, -9, 1, -49.5, -49.5, 1, -49.5, -8.75, 1, -3.75, 9, 1, -3.75, 9.25, 1, -49.5, 10.5, 1, -3.75, 10.75, 1, -2.5, 49.5, 1, -2.5, 49.5, 1, -49.5, -10.25, 1, -1.5, -49.5, 1, 49.5, -8.25, 1, 49.5, -8.25, 1, -1.5, 10.5, 1, -1.5, 8.5, 1, 49.5, 49.5, 1, 49.5, 8.5, 1, -1.5)
@@ -10,6 +11,7 @@ polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 4), PackedInt32Arr
 size = Vector3(100, 1, 100)
 
 [sub_resource type="BoxMesh" id="BoxMesh_sy003"]
+material = ExtResource("2_in7eu")
 size = Vector3(100, 1, 100)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0pqux"]
@@ -36,15 +38,15 @@ shape = SubResource("BoxShape3D_ougbl")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Ground"]
 mesh = SubResource("BoxMesh_sy003")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D"]
+[node name="Obstacle" type="StaticBody3D" parent="NavigationRegion3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48319, -2.59072)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Obstacle"]
 shape = SubResource("BoxShape3D_0pqux")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/StaticBody3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Obstacle"]
 mesh = SubResource("BoxMesh_sx3p4")
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://prefabs/player.tscn", "res://prefabs/unit.tscn", "res://prefabs/spawner.tscn")
+_spawnable_scenes = PackedStringArray("res://prefabs/player.tscn", "res://prefabs/spawner.tscn", "res://prefabs/ore.tscn")
 spawn_path = NodePath("..")

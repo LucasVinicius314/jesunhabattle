@@ -1,16 +1,24 @@
-using System;
 using Godot;
 
 public partial class UnitScript : CharacterBody3D
 {
-  public const float Speed = 5.0f;
+  [Export]
+  float Speed = 5.0f;
 
-  NavigationAgent3D Agent;
-  Node3D Player;
-  Timer Timer;
+  [Export]
+  UnitType UnitType;
+
+  NavigationAgent3D? Agent;
+  Node3D? TargetNode;
+  Timer? Timer;
 
   public override void _PhysicsProcess(double delta)
   {
+    if (Agent == null)
+    {
+      return;
+    }
+
     if (!Multiplayer.IsServer())
     {
       return;
@@ -27,9 +35,9 @@ public partial class UnitScript : CharacterBody3D
 
     var distance = targetPosition.DistanceTo(GlobalPosition);
 
-    if (Player != null)
+    if (TargetNode != null && IsInstanceValid(TargetNode))
     {
-      var inputDir = GlobalPosition.DistanceTo(Player.GlobalPosition) > 3 ? Vector2.Up : Vector2.Zero;
+      var inputDir = GlobalPosition.DistanceTo(TargetNode.GlobalPosition) > 3 ? Vector2.Up : Vector2.Zero;
       var direction = (Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
       if (direction != Vector3.Zero)
       {
@@ -53,6 +61,11 @@ public partial class UnitScript : CharacterBody3D
       rotation.Z = 0;
 
       Rotation = rotation;
+    }
+    else
+    {
+      velocity.X = 0;
+      velocity.Z = 0;
     }
 
     Velocity = velocity;
@@ -84,12 +97,27 @@ public partial class UnitScript : CharacterBody3D
 
     Agent.NavigationFinished += () =>
     {
+      GD.Print("navigation finished");
+
+      switch (UnitType)
+      {
+        case UnitType.MELEE:
+          break;
+        case UnitType.MINER:
+          if (TargetNode is OreScript oreScript)
+          {
+            oreScript.TakeDamage();
+          }
+
+          break;
+      }
+
       SetTarget();
     };
   }
 
   [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
-  void HandleClientTakeDamageRpc()
+  void ClientHandleTakeDamageRpc()
   {
     CallDeferred(Node.MethodName.QueueFree);
   }
@@ -101,13 +129,41 @@ public partial class UnitScript : CharacterBody3D
       return;
     }
 
-    Player = GetNode<Node3D>("/root/MainScene/Player-1");
+    switch (UnitType)
+    {
+      case UnitType.MELEE:
+        TargetNode = GetNode<Node3D>("/root/MainScene/Player-1");
+        break;
+      case UnitType.MINER:
+        Node3D? nearestNode = null;
+        float nearestDistanceSquared = float.MaxValue;
 
-    Agent.TargetPosition = Player.Position;
+        foreach (var node in GetTree().GetNodesInGroup("ores"))
+        {
+          if (node is Node3D node3D && node3D.HasMeta("ore") && (bool)node3D.GetMeta("ore"))
+          {
+            float distanceSquared = Position.DistanceSquaredTo(node3D.GlobalTransform.Origin);
+            if (distanceSquared < nearestDistanceSquared)
+            {
+              nearestDistanceSquared = distanceSquared;
+              nearestNode = node3D;
+            }
+          }
+        }
+
+        TargetNode = nearestNode;
+
+        break;
+    }
+
+    if (Agent != null && TargetNode != null)
+    {
+      Agent.TargetPosition = TargetNode.Position;
+    }
   }
 
   public void TakeDamage()
   {
-    RpcId(1, MethodName.HandleClientTakeDamageRpc);
+    RpcId(1, MethodName.ClientHandleTakeDamageRpc);
   }
 }

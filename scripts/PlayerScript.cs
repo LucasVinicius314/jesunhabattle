@@ -1,13 +1,21 @@
 using Godot;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 
 public partial class PlayerScript : CharacterBody3D
 {
-  public const float Speed = 5.0f;
-  public const float JumpVelocity = 4.5f;
-  public const float MouseSensitivity = 0.1f;
+  readonly PackedScene SpawnerPrefab = GD.Load<PackedScene>("res://prefabs/spawner.tscn");
 
-  Camera3D? Camera;
-  Vector2 MouseDelta;
+  public const float jumpVelocity = 4.5f;
+  public const float mouseSensitivity = 0.1f;
+  public const float speed = 5.0f;
+
+  Camera3D? camera;
+  public string? factionId;
+  MainSceneScript? mainSceneScript;
+  Vector2 mouseDelta;
+  PlayerUiScript? playerUiScript;
 
   public override void _EnterTree()
   {
@@ -18,8 +26,10 @@ public partial class PlayerScript : CharacterBody3D
       return;
     }
 
-    Camera = GetNode<Camera3D>("Camera3D");
-    Camera?.MakeCurrent();
+    camera = GetNode<Camera3D>("Camera3D");
+    camera?.MakeCurrent();
+
+    playerUiScript = camera?.GetNode<PlayerUiScript>("PlayerUi");
   }
 
   public override void _Input(InputEvent @event)
@@ -31,11 +41,40 @@ public partial class PlayerScript : CharacterBody3D
 
     if (@event is InputEventMouseMotion mouseMotionEvent)
     {
-      MouseDelta = mouseMotionEvent.Relative;
+      mouseDelta = mouseMotionEvent.Relative;
     }
-    else if (@event is InputEventMouseButton mouseButtonEvent && mouseButtonEvent.Pressed && mouseButtonEvent.ButtonIndex == MouseButton.Left)
+    else if (@event is InputEventMouseButton mouseButtonEvent && mouseButtonEvent.Pressed)
     {
-      Raycast();
+      switch (mouseButtonEvent.ButtonIndex)
+      {
+        case MouseButton.Left:
+          {
+            var result = Raycast(1);
+            if (result != null)
+            {
+              if (result.Value.Item1 is OreScript oreScript)
+              {
+                oreScript?.TakeDamage();
+              }
+              else if (result.Value.Item1 is UnitScript unitScript)
+              {
+                unitScript?.TakeDamage();
+              }
+            }
+
+            break;
+          }
+        case MouseButton.Right:
+          {
+            var result = Raycast(1);
+            if (result != null && result.Value.Item1.Name == "Ground")
+            {
+              RpcId(1, MethodName.ServerHandleAddSpawnerRpc, result.Value.Item2 + new Vector3(0, 1, 0));
+            }
+
+            break;
+          }
+      }
     }
     else if (@event is InputEventKey eventKey && eventKey.Pressed && Input.IsActionPressed("ui_cancel"))
     {
@@ -59,35 +98,35 @@ public partial class PlayerScript : CharacterBody3D
 
     if (Input.IsActionJustPressed("game_jump") && IsOnFloor())
     {
-      velocity.Y = JumpVelocity;
+      velocity.Y = jumpVelocity;
     }
 
     var inputDir = Input.GetVector("game_left", "game_right", "game_forward", "game_backward");
     var direction = (Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
     if (direction != Vector3.Zero)
     {
-      velocity.X = direction.X * Speed;
-      velocity.Z = direction.Z * Speed;
+      velocity.X = direction.X * speed;
+      velocity.Z = direction.Z * speed;
     }
     else
     {
-      velocity.X = Mathf.MoveToward(Velocity.X, 0, Speed);
-      velocity.Z = Mathf.MoveToward(Velocity.Z, 0, Speed);
+      velocity.X = Mathf.MoveToward(Velocity.X, 0, speed);
+      velocity.Z = Mathf.MoveToward(Velocity.Z, 0, speed);
     }
 
-    RotateY(Mathf.DegToRad(-MouseDelta.X * MouseSensitivity));
-    Camera?.RotateX(Mathf.DegToRad(-MouseDelta.Y * MouseSensitivity));
+    RotateY(Mathf.DegToRad(-mouseDelta.X * mouseSensitivity));
+    camera?.RotateX(Mathf.DegToRad(-mouseDelta.Y * mouseSensitivity));
 
-    if (Camera != null)
+    if (camera != null)
     {
-      Camera.RotationDegrees = new Vector3(
-        Mathf.Clamp(Camera.RotationDegrees.X, -90, 90),
-        Camera.RotationDegrees.Y,
-        Camera.RotationDegrees.Z
+      camera.RotationDegrees = new Vector3(
+        Mathf.Clamp(camera.RotationDegrees.X, -90, 90),
+        camera.RotationDegrees.Y,
+        camera.RotationDegrees.Z
       );
     }
 
-    MouseDelta = Vector2.Zero;
+    mouseDelta = Vector2.Zero;
 
     Velocity = velocity;
     MoveAndSlide();
@@ -101,32 +140,76 @@ public partial class PlayerScript : CharacterBody3D
     }
 
     Input.MouseMode = Input.MouseModeEnum.Captured;
+
+    mainSceneScript = GetNode<Node3D>("/root/MainScene") as MainSceneScript;
+
+    RetrieveGameState();
   }
 
-  void Raycast()
+  [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
+  public void ClientHandleReceiveGameStateRpc(string factionMapPayload)
   {
-    if (Camera == null)
+    var factionMap = JsonSerializer.Deserialize<Dictionary<string, Faction>>(factionMapPayload);
+    if (!factionMap.ContainsKey(factionId))
     {
       return;
     }
 
-    var spaceState = GetWorld3D().DirectSpaceState;
+    var faction = factionMap[factionId];
 
-    var query = PhysicsRayQueryParameters3D.Create(Camera.GlobalPosition, Camera.GlobalTransform.Origin + Camera.GlobalTransform.Basis.Z * -5, 1);
+    if (playerUiScript != null)
+    {
+      playerUiScript.moneyLabel.Text = $"Money: {faction.money}";
+    }
+  }
 
-    var result = spaceState.IntersectRay(query);
+  (Node3D, Vector3)? Raycast(uint collisionMask)
+  {
+    if (camera == null)
+    {
+      return null;
+    }
 
+    var query = PhysicsRayQueryParameters3D.Create(camera.GlobalPosition, camera.GlobalTransform.Origin + camera.GlobalTransform.Basis.Z * -5, collisionMask);
+
+    var result = GetWorld3D().DirectSpaceState.IntersectRay(query);
     if (result.Count == 0)
     {
+      return null;
+    }
+
+    return ((Node3D)result["collider"], (Vector3)result["position"]);
+  }
+
+  void RetrieveGameState()
+  {
+    RpcId(1, MethodName.ServerHandleRetrieveGameState);
+  }
+
+  public void SendGameStateToClient(long id)
+  {
+    if (mainSceneScript == null)
+    {
       return;
     }
 
-    var collider = (Node3D)result["collider"];
+    RpcId(id, MethodName.ClientHandleReceiveGameStateRpc, JsonSerializer.Serialize(mainSceneScript.factionMap));
+  }
 
-    if (collider.HasMeta("unit") && collider.GetMeta("unit").AsBool())
-    {
-      var unitScript = collider as UnitScript;
-      unitScript?.TakeDamage();
-    }
+  [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
+  public void ServerHandleAddSpawnerRpc(Vector3 position)
+  {
+    var spawner = SpawnerPrefab.Instantiate<Node3D>();
+    spawner.GlobalTransform = new Transform3D(Basis.Identity, position);
+
+    MainSceneScript.navigationRegion?.CallDeferred(Node.MethodName.AddChild, spawner);
+
+    MainSceneScript.navigationRegion?.CallDeferred(NavigationRegion3D.MethodName.BakeNavigationMesh);
+  }
+
+  [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
+  public void ServerHandleRetrieveGameState()
+  {
+    SendGameStateToClient(Multiplayer.GetRemoteSenderId());
   }
 }

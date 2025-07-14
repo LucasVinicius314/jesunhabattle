@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://c0q30s62rkq6"]
+
+[ext_resource type="Script" path="res://scripts/OreScript.cs" id="1_h2jma"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_kfuoo"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_syka1"]
+albedo_color = Color(1, 1, 0.0823529, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jr01h"]
+material = SubResource("StandardMaterial3D_syka1")
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_nlfym"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[node name="Ore" type="StaticBody3D" groups=["ores"]]
+script = ExtResource("1_h2jma")
+metadata/ore = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_kfuoo")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_jr01h")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_nlfym")
